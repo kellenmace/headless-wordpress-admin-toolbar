@@ -63,10 +63,6 @@ add_action('graphql_register_types', function () {
         'resolve' => function ($node) {
             global $wp_admin_bar, $wp_the_query, $wp_query;
 
-            if (!is_admin_bar_showing()) {
-                return null;
-            }
-
             $nodes = [];
             $admin_bar_class = apply_filters('wp_admin_bar_class', 'WP_Admin_Bar');
 
