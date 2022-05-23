@@ -60,36 +60,58 @@ add_action('graphql_register_types', function () {
 
     register_graphql_field('ContentNode', 'adminBarMenuItems', [
         'type' => array('list_of' => 'AdminBarMenuItem'),
-        'resolve' => function ($node) {
-            global $wp_admin_bar, $wp_the_query, $wp_query;
-
-            $nodes = [];
-            $admin_bar_class = apply_filters('wp_admin_bar_class', 'WP_Admin_Bar');
-
-            if (empty($wp_admin_bar) && class_exists($admin_bar_class)) {
-                $node->setup();
-                $wp_the_query = $wp_query;
-                $wp_admin_bar = new $admin_bar_class;
-                $wp_admin_bar->initialize();
-                $wp_admin_bar->add_menus();
-                do_action('admin_bar_menu', $wp_admin_bar);
-                $nodes = $wp_admin_bar->get_nodes();
-            }
-
-            $value = array_map(function ($node) {
-                $meta = array_map(fn ($v) => empty($v) ? null : $v, $node->meta);
-
-                return [
-                    'id' => $node->id,
-                    'title' => $node->title ?? null,
-                    'parent' => $node->parent ?? null,
-                    'href' => $node->href ?? null,
-                    'group' => $node->group,
-                    'meta' => $meta
-                ];
-            }, $nodes);
-
-            return $value;
-        },
+        'resolve' => 'resolve_admin_bar_menu_nodes',
     ]);
+
+    $graphql_post_types = get_post_types(array(
+        'show_in_graphql' => true
+    ), 'objects');
+
+    foreach ($graphql_post_types as $graphql_post_type) {
+        $single_name = ucfirst($graphql_post_type->graphql_single_name);
+
+        register_graphql_field("RootQueryTo{$single_name}Connection", 'adminBarMenuItems', [
+            'type' => array('list_of' => 'AdminBarMenuItem'),
+            'resolve' => 'resolve_admin_bar_menu_nodes',
+        ]);
+    }
 });
+
+function resolve_admin_bar_menu_nodes($source)
+{
+    global $wp_admin_bar, $wp_the_query, $wp_query;
+
+    if (!_get_admin_bar_pref()) {
+        return null;
+    }
+
+    $nodes = [];
+    $admin_bar_class = apply_filters('wp_admin_bar_class', 'WP_Admin_Bar');
+
+    if (empty($wp_admin_bar) && class_exists($admin_bar_class)) {
+        if (!empty($source->setup)) {
+            $source->setup();
+        }
+        $wp_the_query = $wp_query;
+        $wp_admin_bar = new $admin_bar_class;
+        $wp_admin_bar->initialize();
+        $wp_admin_bar->add_menus();
+        do_action('admin_bar_menu', $wp_admin_bar);
+        $nodes = $wp_admin_bar->get_nodes();
+    }
+
+    $value = array_map(function ($node) {
+        $meta = array_map(fn ($v) => empty($v) ? null : $v, $node->meta);
+
+        return [
+            'id' => $node->id,
+            'title' => $node->title ?? null,
+            'parent' => $node->parent ?? null,
+            'href' => $node->href ?? null,
+            'group' => $node->group,
+            'meta' => $meta
+        ];
+    }, $nodes);
+
+    return $value;
+}
