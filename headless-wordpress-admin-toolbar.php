@@ -14,7 +14,11 @@
 require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
 
 add_action('graphql_register_types', function () {
-    register_graphql_object_type('AdminBarMenuItemMeta', [
+    $admin_bar_menu_item_type = 'AdminBarMenuItem';
+    $admin_bar_menu_item_meta_type = 'AdminBarMenuItemMeta';
+    $field_name = 'adminBarMenuItems';
+
+    register_graphql_object_type($admin_bar_menu_item_meta_type, [
         'description' => __('A single node from the admin bar menu', 'faust-admin-bar'),
         'fields' => [
             'class' => [
@@ -28,7 +32,7 @@ add_action('graphql_register_types', function () {
         ],
     ]);
 
-    register_graphql_object_type('AdminBarMenuItem', [
+    register_graphql_object_type($admin_bar_menu_item_type, [
         'description' => __('A single node from the admin bar menu', 'faust-admin-bar'),
         'fields' => [
             'id' => [
@@ -52,26 +56,34 @@ add_action('graphql_register_types', function () {
                 'description' => __('Determines if a link is for grouping other links', 'faust-admin-bar'),
             ],
             'meta' => [
-                'type' => 'AdminBarMenuItemMeta',
+                'type' => $admin_bar_menu_item_meta_type,
                 'description' => __('Additional link information including class and tabindex', 'faust-admin-bar'),
             ],
         ],
     ]);
 
-    register_graphql_field('ContentNode', 'adminBarMenuItems', [
-        'type' => array('list_of' => 'AdminBarMenuItem'),
+    register_graphql_field('ContentNode', $field_name, [
+        'type' => ['list_of' => $admin_bar_menu_item_type],
         'resolve' => 'resolve_admin_bar_menu_nodes',
     ]);
 
-    $graphql_post_types = get_post_types(array(
-        'show_in_graphql' => true
-    ), 'objects');
+    register_graphql_field('TermNode', $field_name, [
+        'type' => ['list_of' => $admin_bar_menu_item_type],
+        'resolve' => 'resolve_admin_bar_menu_nodes',
+    ]);
+
+    register_graphql_field('User', $field_name, [
+        'type' => ['list_of' => $admin_bar_menu_item_type],
+        'resolve' => 'resolve_admin_bar_menu_nodes',
+    ]);
+
+    $graphql_post_types = get_post_types(['show_in_graphql' => true], 'objects');
 
     foreach ($graphql_post_types as $graphql_post_type) {
         $single_name = ucfirst($graphql_post_type->graphql_single_name);
 
-        register_graphql_field("RootQueryTo{$single_name}Connection", 'adminBarMenuItems', [
-            'type' => array('list_of' => 'AdminBarMenuItem'),
+        register_graphql_field("RootQueryTo{$single_name}Connection", $field_name, [
+            'type' => ['list_of' => $admin_bar_menu_item_type],
             'resolve' => 'resolve_admin_bar_menu_nodes',
         ]);
     }
