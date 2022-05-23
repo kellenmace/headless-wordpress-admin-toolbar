@@ -77,6 +77,16 @@ add_action('graphql_register_types', function () {
         'resolve' => 'resolve_admin_bar_menu_nodes',
     ]);
 
+    register_graphql_field('RootQueryToMediaItemConnection', $field_name, [
+        'type' => ['list_of' => $admin_bar_menu_item_type],
+        'resolve' => 'resolve_admin_bar_menu_nodes',
+    ]);
+
+    register_graphql_field('RootQueryToUserConnection', $field_name, [
+        'type' => ['list_of' => $admin_bar_menu_item_type],
+        'resolve' => 'resolve_admin_bar_menu_nodes',
+    ]);
+
     $graphql_post_types = get_post_types(['show_in_graphql' => true], 'objects');
 
     foreach ($graphql_post_types as $graphql_post_type) {
