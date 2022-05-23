@@ -81,7 +81,7 @@ function resolve_admin_bar_menu_nodes($source)
 {
     global $wp_admin_bar, $wp_the_query, $wp_query;
 
-    if (!_get_admin_bar_pref()) {
+    if (!is_user_logged_in() || !_get_admin_bar_pref()) {
         return null;
     }
 
