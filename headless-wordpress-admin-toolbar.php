@@ -63,6 +63,16 @@ add_action('graphql_register_types', function () {
         'resolve' => 'resolve_admin_bar_menu_nodes',
     ]);
 
+    register_graphql_field('TermNode', 'adminBarMenuItems', [
+        'type' => array('list_of' => 'AdminBarMenuItem'),
+        'resolve' => 'resolve_admin_bar_menu_nodes',
+    ]);
+
+    register_graphql_field('User', 'adminBarMenuItems', [
+        'type' => array('list_of' => 'AdminBarMenuItem'),
+        'resolve' => 'resolve_admin_bar_menu_nodes',
+    ]);
+
     $graphql_post_types = get_post_types(array(
         'show_in_graphql' => true
     ), 'objects');
