@@ -115,7 +115,7 @@ function resolve_admin_bar_menu_nodes($source)
     $admin_bar_class = apply_filters('wp_admin_bar_class', 'WP_Admin_Bar');
 
     if (empty($wp_admin_bar) && class_exists($admin_bar_class)) {
-        if (method_exists($source, 'setup')) {
+        if (!empty($source->setup)) {
             $source->setup();
         }
         $wp_the_query = $wp_query;
