@@ -79,6 +79,11 @@ add_action('graphql_register_types', function () {
         'resolve' => 'resolve_admin_bar_menu_nodes',
     ]);
 
+    register_graphql_field('RootQueryToContentNodeConnection', $admin_bar_menu_items_field_name, [
+        'type' => ['list_of' => $admin_bar_menu_item_type],
+        'resolve' => 'resolve_admin_bar_menu_nodes',
+    ]);
+
     register_graphql_field('RootQueryToMediaItemConnection', $admin_bar_menu_items_field_name, [
         'type' => ['list_of' => $admin_bar_menu_item_type],
         'resolve' => 'resolve_admin_bar_menu_nodes',
